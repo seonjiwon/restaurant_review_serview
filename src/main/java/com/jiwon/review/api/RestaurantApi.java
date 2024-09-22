@@ -1,7 +1,10 @@
 package com.jiwon.review.api;
 
 import com.jiwon.review.api.request.CreateAndEditRestaurantRequest;
+import com.jiwon.review.api.response.RestaurantDetailView;
+import com.jiwon.review.api.response.RestaurantView;
 import com.jiwon.review.service.RestaurantService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,17 +21,17 @@ public class RestaurantApi {
   private final RestaurantService restaurantService;
 
   @GetMapping("/restaurants")
-  public String getRestaurants() {
-    return "This is getRestaurants";
+  public List<RestaurantView> getRestaurants() {
+    return restaurantService.getAllRestaurant();
   }
 
 
   @GetMapping("/restaurant/{restaurantId}")
-  public String getRestaurant(
+  public RestaurantDetailView getRestaurant(
       @PathVariable Long restaurantId
   ) {
-    return "This is getRestaurant";
-  }
+    return restaurantService.getRestaurantDetail(restaurantId);
+}
 
 
   @PostMapping("/restaurant")

@@ -1,5 +1,7 @@
 package com.jiwon.review.service;
 
+import com.jiwon.review.api.response.RestaurantDetailView;
+import com.jiwon.review.api.response.RestaurantView;
 import com.jiwon.review.model.MenuEntity;
 import com.jiwon.review.repository.MenuRepository;
 import com.jiwon.review.repository.RestaurantRepository;
@@ -31,8 +33,7 @@ public class RestaurantService {
                                                   .build();
     restaurantRepository.save(restaurant);
 
-
-    request.getMenus().forEach((menu) ->{
+    request.getMenus().forEach((menu) -> {
       MenuEntity menuEntity = MenuEntity.builder()
                                         .restaurantId(restaurant.getId())
                                         .name(menu.getName())
@@ -43,7 +44,6 @@ public class RestaurantService {
 
       menuRepository.save(menuEntity);
     });
-
 
     return restaurant;
   }
@@ -80,5 +80,49 @@ public class RestaurantService {
 
     List<MenuEntity> menus = menuRepository.findAllByRestaurantId(restaurantId);
     menuRepository.deleteAll(menus);
+  }
+
+  @Transactional(readOnly = true)
+  public List<RestaurantView> getAllRestaurant() {
+    List<RestaurantEntity> restaurants = restaurantRepository.findAll();
+
+    return restaurants.stream().map((restaurant) -> RestaurantView.builder()
+                                                                  .id(restaurant.getId())
+                                                                  .name(restaurant.getName())
+                                                                  .address(restaurant.getAddress())
+                                                                  .createdAt(
+                                                                      restaurant.getCreateAt())
+                                                                  .updatedAt(
+                                                                      restaurant.getUpdateAt())
+                                                                  .build())
+                                                                  .toList();
+  }
+
+  @Transactional(readOnly = true)
+  public RestaurantDetailView getRestaurantDetail(Long restaurantId) {
+    RestaurantEntity restaurant = restaurantRepository.findById(restaurantId).orElseThrow();
+    List<MenuEntity> menus = menuRepository.findAllByRestaurantId(restaurantId);
+
+    return RestaurantDetailView.builder()
+                               .id(restaurant.getId())
+                               .name(restaurant.getName())
+                               .address(restaurant.getAddress())
+                               .createdAt(restaurant.getCreateAt())
+                               .updatedAt(restaurant.getUpdateAt())
+                               .menus(
+                                   menus.stream().map((menu) -> RestaurantDetailView.Menu.builder()
+                                                                                         .id(menu.getId())
+                                                                                         .name(
+                                                                                             menu.getName())
+                                                                                         .price(
+                                                                                             menu.getPrice())
+                                                                                         .createdAt(
+                                                                                             menu.getCreatedAt())
+                                                                                         .updatedAt(
+                                                                                             menu.getUpdatedAt())
+                                                                                         .build()
+                                   ).toList()
+                               ).build();
+
   }
 }
